@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Othello</title>
+		<style>
+			html, body {
+				height: 100%;
+				/*Overall margins for the webpage*/
+				margin-right: 5%;
+			   	margin-left: 5%;
+			}
+			table, td, th {
+			    border: 1px solid black;
+			}
+			table {
+			    border-collapse: collapse;
+			    width: 50%;
+			}
+			td{
+				height: 25px;
+			}
+			#sidebar{
+			  	float:left;
+				width:15%;
+			}
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<script src="othello_script.js"></script>
+	</head>
+	<body>
+		<h1 style="text-align:center;">Othello</h1>
+		<aside id="sidebar">
+			# Rows: <br>
+			4--6--8--10-12-14-16<br>
+			<input id="getR" type="range" name="quantity" min="4" max="16" step="2"><br>
+			# Columns: <br>
+			4--6--8--10-12-14-16<br>
+			<input id="getC" type="range" name="quantity" min="4" max="16" step="2"><br>
+			<input id="play" type="button" onclick="start_game_button()" value="Play!">
+		</aside>
+		<div id="turn"></div>
+		<table id="dynamic"></table>
+	</body>
+	<script>
+
+	</script>
+</html>
