@@ -1,10 +1,44 @@
-//Using global variables, since this
-//compiler does not recognize key word
-//'class', and I haven't figured out the problem
-var player_turn = "black";
-var board; //a 2d array representing the board
-var start_position = 'w'
-;
+//This module contains the game logic
+
+function othello_logic(rows, cols, first_turn, position){
+	this._rows = rows;
+	this._cols = cols;
+	this._turn = first_turn;
+	this._board = initialize_board(rows, cols, position);
+	
+	//changes the turn of the player
+	this.change_turn = function(){
+		if(this._turn == "black"){ //write out whole color name, since file name for image includes the whole color name
+			this._turn = "white";
+		}else{
+			this._turn = "black";
+		}
+	};
+	//adds the piece to specified row and col
+	this.add_piece = function(row,col){
+		this._board[row][col] = this._turn[0];
+		this.change_turn();
+	};
+	//gets the piece from the specified row and col
+	this.get_piece = function(row,col){
+		return this._board[row][col];
+	};
+	//prints the board on the console
+	this.log_board = function(){
+		for(var i=0; i<this._rows; i++){
+			var data = '';
+			for(var j=0; j<this._cols; j++){
+				data += this._board[i][j] + ' ';
+			}
+			console.log(data);
+		}
+		console.log('---------');
+	};
+	//return which player's turn it its
+	this.get_turn = function(){
+		return this._turn;
+	};
+}
 
 //changes who's turn it is
 function change_turn(){
@@ -15,31 +49,10 @@ function change_turn(){
 	}
 }
 
-//this makes an NxM table (N rows, M cols) on the website
-//by dynamically adding table rows (<tr> tag)
-function createTableView(n,m){
-	$("#dynamic").children().remove(); //removes any row if there were any
-	var table = document.getElementById("dynamic");
-	for(var i=0; i<n; i+=1){
-		var row = table.insertRow(i);
-		for(var j=0; j<m; j++){
-			var cell = row.insertCell(j);
-			cell.id = i+"-"+j;
-			if(board[i][j] == '.'){
-				cell.innerHTML = '<img alt="" height="100%" width="100%" src="blank_space.PNG">';
-			}else if(board[i][j] == 'b'){
-				cell.innerHTML = '<img alt="" height="100%" width="100%" src="black_piece.PNG">';
-			}else{
-				cell.innerHTML = '<img alt="" height="100%" width="100%" src="white_piece.PNG">';
-			}
-		}
-	}
-}
-
 //Initializes board 2d array variable (nxm dimensions)
 //to n rows and m columns
 //The values are initially set to null
-function initialize_board(rows, cols){
+function initialize_board(rows, cols, position){
 	board = new Array(rows);
 	for(var i=0; i<rows; i++){
 		board[i] = new Array(cols);
@@ -50,62 +63,46 @@ function initialize_board(rows, cols){
 		}
 	}
 	var opposite = 'something';
-	if (start_position=='b'){
+	if (position=='b'){
 		opposite = 'w';
 	}else{
 		opposite = 'b';
 	}
-	board[rows/2-1][cols/2-1] = start_position;
+	board[rows/2-1][cols/2-1] = position;
 	board[rows/2-1][cols/2] = opposite;
 	board[rows/2][cols/2-1] = opposite;
-	board[rows/2][cols/2] = start_position;
+	board[rows/2][cols/2] = position;
+	return board;
 }
 
 //Prints out the 2d array in
 //the console log (nxm dimensions)
-function log_board(n,m){
-	for(var i=0; i<n; i++){
+function log_board(board, rows, cols){
+	for(var i=0; i<rows; i++){
 		data = '';
-		for(var j=0; j<m; j++){
+		for(var j=0; j<cols; j++){
 			data += board[i][j] + ' ';
 		}
 		console.log(data);
 	}
 }
 
-//function that is called when user 
-//clicks start_game button on the screen
-function start_game_button(){
-	var rows = $("#getR").val();
-	var cols = $("#getC").val();
-	start_game(rows,cols);
-}
-
 //starts the game with specified rows and columns
 function start_game(rows, cols){
 	//id format: row-column (both start with 0)
-	$("#turn").text("Player with " + player_turn + " pieces, make a move.");
-	initialize_board(rows,cols);
-	log_board(rows,cols);
+	$("#turn").text("Player with " + 'black' + " pieces, make a move.");
+	var o = new othello_logic(rows,cols,'black', 'w');
 	createTableView(rows,cols);
 	//click on square to put a piece on it
 	$( "td" ).click(function() {
 	  var board_locs = $(this).attr('id').split('-');
-	  if(board[board_locs[0]][board_locs[1]] == '.'){
-		  	$(this).html('<img alt="" height="100%" width="100%" src="' + player_turn + '_piece.PNG">');
-		  board[board_locs[0]][board_locs[1]] = player_turn[0];
-		  change_turn();
-		  $("#turn").text("Player with " + player_turn + " pieces, make a move.");
-		  log_board(rows,cols);
-		  console.log('---------'); 
+	  if(o.get_piece(board_locs[0],board_locs[1]) == '.'){
+		  	$(this).html('<img alt="" height="100%" width="100%" src="' + o.get_turn() + '_piece.PNG">');
+		  o.add_piece(board_locs[0], board_locs[1]);
+		  $("#turn").text("Player with " + o.get_turn() + " pieces, make a move.");
+		  o.log_board(); 
 	  }
 	});
-}
-
-//Updates the view of the board (html table)
-function add_piece_view(row,col){
-	var id = '#' + row + '-' + col;
-	$(id).html('<img alt="" height="100%" width="100%" src="' + player_turn + '_piece.PNG">');
 }
 
 //onload function important! HTML need to load first	
@@ -115,4 +112,8 @@ window.onload = function(){
 	// y = 5;
 	// var id = '#' + x + '-' +y;
 	// $(id).html('<img alt="" height="100%" width="100%" src="' + player_turn + '_piece.PNG">');
+	// var o = new othello_logic(4,4,'black','w');
+	// console.log(o.turn);
+	// o.change_turn();
+	// console.log(o.turn);
 };
