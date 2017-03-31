@@ -4,7 +4,7 @@ function othello_logic(rows, cols, first_turn, position){
 	this._rows = rows;
 	this._cols = cols;
 	this._turn = first_turn;
-	this._board = initialize_board(rows, cols, position);
+	this._board = initialize_board(rows, cols, position); // 2D array 
 	
 	//changes the turn of the player
 	this.change_turn = function(){
@@ -34,10 +34,13 @@ function othello_logic(rows, cols, first_turn, position){
 		}
 		console.log('---------');
 	};
-	//return which player's turn it its
+	//return which player's turn it is
 	this.get_turn = function(){
 		return this._turn;
 	};
+    this.get_board = function(){
+        return this._board;
+    }
 }
 
 //changes who's turn it is
@@ -96,13 +99,37 @@ function start_game(rows, cols){
 	//click on square to put a piece on it
 	$( "td" ).click(function() {
 	  var board_locs = $(this).attr('id').split('-');
-	  if(o.get_piece(board_locs[0],board_locs[1]) == '.'){
-		  	$(this).html('<img alt="" height="100%" width="100%" src="' + o.get_turn() + '_piece.PNG">');
+      // TODO: Implement the proper game logic
+      var row = parseInt(board_locs[0]);
+      var col = parseInt(board_locs[1]);
+	  if(o.get_piece(row,col) == '.'){
+          var temp = direction(o.get_board(),row,col,1,1);
+          console.log(temp);
+          // TODO: before adding, check if it's a valid move
+		  $(this).html('<img alt="" height="100%" width="100%" src="' + o.get_turn() + '_piece.PNG">');
 		  o.add_piece(board_locs[0], board_locs[1]);
 		  $("#turn").text("Player with " + o.get_turn() + " pieces, make a move.");
 		  o.log_board(); 
 	  }
 	});
+}
+
+// functions for checking adjacent locations
+
+/*Returns a list of locations (row and col tuples) of the spaces in the
+ board of the direction of row_increment, col_increment. This function will
+ be used in the functions below.*/
+function direction(board, row, col, row_increment, col_increment){
+    var result = [];
+    row += row_increment;
+    col += col_increment;
+    while((0<=row) && (row<board.length) && (0<=col) && (col<board[0].length)){
+        var loc = [row, col];
+        result.push(loc);
+        row += row_increment;
+        col += col_increment;
+    }
+    return result;
 }
 
 //onload function important! HTML need to load first	
