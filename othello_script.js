@@ -64,7 +64,7 @@ function othello_logic(rows, cols, first_turn, position){
 			if(piece == '.' || piece == othello_piece){
 				return false;
 			}
-			for(var i=1; i<=list.length; i++){
+			for(var i=1; i<list.length; i++){
 				piece = this._board[list[i][0]][list[i][1]];
 				if(piece == othello_piece){
 					return true;
@@ -87,9 +87,9 @@ function othello_logic(rows, cols, first_turn, position){
 			for(var j=0; j<locations_list[i].length; j++){
 				var row = locations_list[i][j][0];
 				var col = locations_list[i][j][1];
-				console.log(this._board[row][col]);
 				if(this._board[row][col] == this.get_opposite_color()){
 					this._board[row][col] = this.get_turn_color();
+					update_piece_view(row, col, this._turn);
 				}else{
 					break;
 				}

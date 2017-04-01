@@ -33,3 +33,8 @@ function add_piece_view(row,col){
 	var id = '#' + row + '-' + col;
 	$(id).html('<img alt="" height="100%" width="100%" src="' + player_turn + '_piece.PNG">');
 }
+
+function update_piece_view(row, col, color){
+	var id = '#' + row + '-' + col;
+	$(id).html('<img alt="" height="100%" width="100%" src="' + color + '_piece.PNG">');
+}
