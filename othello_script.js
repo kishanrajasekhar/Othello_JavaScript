@@ -5,6 +5,8 @@ function othello_logic(rows, cols, first_turn, position){
 	this._cols = cols;
 	this._turn = first_turn;
 	this._board = initialize_board(rows, cols, position); // 2D array 
+	this._black_count = 2;
+	this._white_count = 2;
 	
 	//changes the turn of the player
 	this.change_turn = function(){
@@ -14,6 +16,7 @@ function othello_logic(rows, cols, first_turn, position){
 			this._turn = "black";
 		}
 	};
+
 	//adds the piece to specified row and col
 	this.add_piece = function(row,col){
 		this._board[row][col] = this._turn[0];
@@ -89,12 +92,26 @@ function othello_logic(rows, cols, first_turn, position){
 				var col = locations_list[i][j][1];
 				if(this._board[row][col] == this.get_opposite_color()){
 					this._board[row][col] = this.get_turn_color();
+					if(this.get_turn_color() == 'w'){
+						this._white_count += 1;
+						this._black_count -= 1;
+					}else{
+						this._white_count -= 1;
+						this._black_count += 1;
+					}
 					update_piece_view(row, col, this._turn);
 				}else{
 					break;
 				}
 			}
 		}
+	};
+	
+	this.increment_white = function(){
+		this._white_count += 1;
+	};
+	this.increment_black = function(){
+		this._black_count += 1;
 	};
 	
 	//return which player's turn it is
@@ -118,6 +135,12 @@ function othello_logic(rows, cols, first_turn, position){
     this.get_board = function(){
         return this._board;
     };
+	this.get_black_count = function(){
+		return this._black_count;
+	};
+	this.get_white_count = function(){
+		return this._white_count;
+	};
 }
 
 //changes who's turn it is
@@ -173,6 +196,7 @@ function start_game(rows, cols){
 	$("#turn").text("Player with " + 'black' + " pieces, make a move.");
 	var o = new othello_logic(rows,cols,'black', 'w');
 	createTableView(rows,cols);
+	$("#score").text("Black: " + o.get_black_count() + " White: " + o.get_white_count());
 	//click on square to put a piece on it
 	$( "td" ).click(function() {
 	  var board_locs = $(this).attr('id').split('-');
@@ -182,11 +206,17 @@ function start_game(rows, cols){
 	  if(o.get_piece(row,col) == '.'){
 		  var locs_to_flip = o.locations_to_flip(row,col);
 		  if(locs_to_flip.length > 0){
+			  if(o.get_turn_color() == 'w'){
+				o.increment_white();
+			  }else{
+				o.increment_black();
+			  }
 			  o.flip(locs_to_flip);
 			  // TODO: before adding, check if it's a valid move
 			  $(this).html('<img alt="" height="100%" width="100%" src="' + o.get_turn() + '_piece.PNG">');
 			  o.add_piece(board_locs[0], board_locs[1]);
 			  $("#turn").text("Player with " + o.get_turn() + " pieces, make a move.");
+			  $("#score").text("Black: " + o.get_black_count() + " White: " + o.get_white_count());
 			  o.log_board(); 
 		  }
 	  }
