@@ -7,6 +7,8 @@ function othello_logic(rows, cols, first_turn, position){
 	this._board = initialize_board(rows, cols, position); // 2D array 
 	this._black_count = 2;
 	this._white_count = 2;
+	this._game_over = false;
+	this._skip_count = 0;
 	
 	//changes the turn of the player
 	this.change_turn = function(){
@@ -15,6 +17,37 @@ function othello_logic(rows, cols, first_turn, position){
 		}else{
 			this._turn = "black";
 		}
+	};
+	
+	/* Returns whether if there is any valid move. Otherwise
+	changes turn */
+	this.any_valid_move = function(){
+		for(var i=0; i<this._board.length; i++){
+			for(var j=0; j<this._board[i].length; j++){
+				if(this._board[i][j] == '.' && this.locations_to_flip(i,j).length > 0){
+				 return true;
+				}
+			}
+		}
+		return false;
+	};
+	
+	/* Returns whether the board is full or not */
+	this.is_full_board = function(){
+		return (this._black_count + this._white_count) == (this._board.length * this._board[0].length);
+	};
+	
+	this.is_game_over = function(){
+		return this._black_count==0 || this._white_count==0 || this.is_full_board() || this._skip_count > 1;
+	}
+	this.black_wins = function(){
+		return this._black_count > this._white_count;
+	};
+	this.white_wins = function(){
+		return this._white_count > this._black_count;
+	};
+	this.is_tie = function(){
+		return this._white_count == this._black_count;
 	};
 
 	//adds the piece to specified row and col
@@ -113,6 +146,12 @@ function othello_logic(rows, cols, first_turn, position){
 	this.increment_black = function(){
 		this._black_count += 1;
 	};
+	this.reset_skip_count = function(){
+		this._skip_count = 0;
+	};
+	this.increment_skip_count = function(){
+		this._skip_count += 1;
+	};
 	
 	//return which player's turn it is
 	this.get_turn = function(){
@@ -193,6 +232,7 @@ function log_board(board, rows, cols){
 //starts the game with specified rows and columns
 function start_game(rows, cols){
 	//id format: row-column (both start with 0)
+	$("#extra_message").text("");
 	$("#turn").text("Player with " + 'black' + " pieces, make a move.");
 	var o = new othello_logic(rows,cols,'black', 'w');
 	createTableView(rows,cols);
@@ -204,20 +244,53 @@ function start_game(rows, cols){
       var row = parseInt(board_locs[0]);
       var col = parseInt(board_locs[1]);
 	  if(o.get_piece(row,col) == '.'){
-		  var locs_to_flip = o.locations_to_flip(row,col);
-		  if(locs_to_flip.length > 0){
-			  if(o.get_turn_color() == 'w'){
-				o.increment_white();
-			  }else{
-				o.increment_black();
+		  if(o.is_game_over()){
+			$("#extra_message").text("Game Over!");
+			if(o.is_tie()){
+				$("#turn").text("It's a tie!");
+			}else if(o.black_wins()){
+				$("#turn").text("Black Wins!");
+			}else{
+				$("#turn").text("White Wins!");
+			}
+		  }else{
+			  var locs_to_flip = o.locations_to_flip(row,col);
+			  if(locs_to_flip.length > 0){
+				  if(o.get_turn_color() == 'w'){
+					o.increment_white();
+				  }else{
+					o.increment_black();
+				  }
+				  o.flip(locs_to_flip);
+				  // TODO: before adding, check if it's a valid move
+				  $(this).html('<img alt="" height="100%" width="100%" src="' + o.get_turn() + '_piece.PNG">');
+				  o.add_piece(board_locs[0], board_locs[1]);
+				  if(o.any_valid_move()){
+					  o.reset_skip_count();
+					  $("#extra_message").text("");
+					  $("#turn").text("Player with " + o.get_turn() + " pieces, make a move.");
+					  $("#score").text("Black: " + o.get_black_count() + " White: " + o.get_white_count());
+				  }else{
+					  o.increment_skip_count();
+					  $("#extra_message").text("Player with " + o.get_turn() + " has to skip a turn.");
+					  o.change_turn()
+					  if(o.any_valid_move()){
+						  $("#turn").text("Player with " + o.get_turn() + " pieces, make a move.");
+						  $("#score").text("Black: " + o.get_black_count() + " White: " + o.get_white_count());
+					  }else{
+						  o.increment_skip_count();
+						  $("#extra_message").text("Game Over!");
+						  if(o.is_tie()){
+						    $("#turn").text("It's a tie!");
+						  }else if(o.black_wins()){
+							$("#turn").text("Black Wins!");
+						  }else{
+							$("#turn").text("White Wins!");
+						  }
+					  }
+				  }
+				  o.log_board(); 
 			  }
-			  o.flip(locs_to_flip);
-			  // TODO: before adding, check if it's a valid move
-			  $(this).html('<img alt="" height="100%" width="100%" src="' + o.get_turn() + '_piece.PNG">');
-			  o.add_piece(board_locs[0], board_locs[1]);
-			  $("#turn").text("Player with " + o.get_turn() + " pieces, make a move.");
-			  $("#score").text("Black: " + o.get_black_count() + " White: " + o.get_white_count());
-			  o.log_board(); 
 		  }
 	  }
 	});
